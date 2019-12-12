@@ -1,20 +1,23 @@
 class Undergrid {
   int[][][] grid;
+  color[][][] displayGrid;
   int cellWidth;
 
   Undergrid(int cw) {
     cellWidth = cw;
-    grid = new int[1][ceil(width/cellWidth)][ceil(height/cellWidth)];
+    grid = new int[1][ceil(height/cellWidth)][ceil(width/cellWidth)];
+    displayGrid = new int[1][ceil(height/cellWidth)][ceil(width/cellWidth)];
+
     println("Made new grid with the following dimensions:");
     println(grid.length+" "+ceil(width/cellWidth)+" "+ceil(height/cellWidth));
     for (int i = 0; i < grid.length; i++) {
       for (int j = 0; j < grid[i].length; j++) {
         for (int k = 0; k < grid[i][j].length; k++) {
           grid[i][j][k] = 0;
+          displayGrid[i][j][k] = color(0, 0, 0);
         }
       }
     }
-    //grid[0][0][floor(height/cellWidth)-1] = 1;
   }
   void display() {
     noStroke();
@@ -22,13 +25,10 @@ class Undergrid {
       for (int j = 0; j < grid[i].length; j++) {
         for (int k = 0; k  < grid[i][j].length; k++) {
           if (grid[i][j][k] == 0) {
-            //println("///////");
-            //println(grid[i][j][k]);
-            //println("_______");
             fill(0);
             stroke(20);
           } else {
-            fill(grid[i][j][k]);
+            fill(displayGrid[i][j][k]);
             stroke(0);
           }
           pushMatrix();
@@ -37,8 +37,6 @@ class Undergrid {
           rect(0, 0, cellWidth, cellWidth);
           fill(0);
           popMatrix();
-
-          //text((grid[i].length-j-1)-(grid[i][j].length-k), k, j);
         }
       }
     }
@@ -52,9 +50,9 @@ class Undergrid {
       }
     }
   }
-  void update(int i, int j, int val) {
-    println("UPDATING Grid: ["+i+"]["+j+"]");
-    grid[0][i][j] = val;
+  void update(int i, int j, color val) {
+    grid[0][i][j] = 255;
+    displayGrid[0][i][j] = val;
   }
 
   int checkGrid(int i, int j, int val) {

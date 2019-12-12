@@ -11,7 +11,7 @@ boolean backstep = false;
 int p;
 int pieceCount = 0;
 PVector scanner = new PVector(0, 0);
-PVector scannerMin = new PVector(4, 4);
+PVector scannerMin = new PVector(0, 0);
 boolean next = false;
 int[][][] tetromino = {
 
@@ -104,10 +104,34 @@ int[][][] tetromino = {
     {1, 1, 1, 0}, 
     {0, 0, 0, 0}, 
     {0, 0, 0, 0}
+  }, 
+  { // T 0 - 15
+    {1, 1, 1, 0}, 
+    {0, 1, 0, 0}, 
+    {0, 0, 0, 0}, 
+    {0, 0, 0, 0}
+  }, 
+  { // T 90 - 16
+    {1, 0, 0, 0}, 
+    {1, 1, 0, 0}, 
+    {1, 0, 0, 0}, 
+    {0, 0, 0, 0}
+  }, 
+  { // T 180 - 17
+    {0, 1, 0, 0}, 
+    {1, 1, 1, 0}, 
+    {0, 0, 0, 0}, 
+    {0, 0, 0, 0}
+  }, 
+  { // T 270 - 18
+    {0, 1, 0, 0}, 
+    {1, 1, 0, 0}, 
+    {0, 1, 0, 0}, 
+    {0, 0, 0, 0}
   }
 };
 
-int piece = 0;//int(random(tetromino.length));
+int piece = int(random(tetromino.length));
 int xAdd = 0;
 int yAdd = 0;
 int blockWidth = 40;
@@ -121,15 +145,19 @@ int firstBlock = 0;
 int lastBlock = 3;
 
 void setup() {
-  size(800, 800);
+  //size(800, 800);
+  fullScreen();
   //create a grid where pixel i*blockwidth is false
   ug = new Undergrid(blockWidth);
-  frameRate(20);
+  frameRate(900);
   addBlock();
   checkArea();
 }
 
 void draw() {  
+  translate(width, height);
+  rotate(radians(180));
+  pushMatrix();
   background(255);
   ug.display();
   if (next) {
@@ -146,14 +174,15 @@ void draw() {
     addBlock();
     next = false;
   }
-  if (scanner.x >= 16) {
+  if (scanner.x >= width/blockWidth-tetromino[piece].length) {
     scanner.x = scannerMin.x;
     scanner.y++;
   }
   if (piece >= tetromino.length) piece = 0;
 
-  if (scanner.y >= 16) {
+  if (scanner.y >= 17) {
     scanner.y = scannerMin.y;
+    ug.clear();
   }
 
   pushMatrix();
@@ -162,8 +191,9 @@ void draw() {
   displayLast();
   displayFirst();
   popMatrix();
-  
-  //next = true;
+
+  next = true;
+  popMatrix();
 }
 
 void addBlock() {
@@ -172,7 +202,7 @@ void addBlock() {
   firstBlock = 0;
   piece++;// int(random(tetromino.length));
   count++;
-  if (count > tetromino.length-1){
+  if (count > tetromino.length-1) {
     scanner.x+=1;
     count = 0;
   }
@@ -225,13 +255,23 @@ void keyPressed() {
   }
 }
 
+void checkFirst() {
+  getTetrominoSum();
+  overLayTotal = 0;
+
+  if ( tetromino[piece][0][firstBlock] + ug.grid[0][int(scanner.x)][firstBlock] > 1) next = true;
+
+  println("T: " + tetrominoSum);
+  println("O: "+ overLayTotal);
+}
+
 void checkArea() {
   getTetrominoSum();
   overLayTotal = 0;
   for (int i = 0; i < tetrominoW; i++) {
     for (int j = 0; j < tetrominoH; j++) {
       fill(0, 255, 0, 100);
-      if( tetromino[piece][j][i] > 0) overLayTotal += ug.checkGrid(int(scanner.y+i), int((scanner.x+j)), 1);
+      if ( tetromino[piece][j][i] > 0) overLayTotal += ug.checkGrid(int(scanner.y+i), int((scanner.x+j)), 1);
     }
   }
   println("T: " + tetrominoSum);
@@ -249,11 +289,13 @@ void getTetrominoSum() {
 }
 
 void pasteTetromino() {
-  int rando = int(random(50, 255));
+  color rando = color(int(random(50, 255)), int(random(50, 255)), int(random(50, 255)));
   for (int i = 0; i < tetrominoW; i++) {
     for (int j = 0; j < tetrominoH; j++) {
       if (tetromino[piece][i][j] > 0) {
-        ug.update(int(scanner.y+j), int((scanner.x+i-firstBlock)), rando);
+        if (scanner.x+i-firstBlock >= 0 &&(scanner.x+i+lastBlock) <= width/blockWidth) {
+          ug.update(int(scanner.y+j), int((scanner.x+i-firstBlock)), rando);
+        }
       }
     }
   }
@@ -269,4 +311,16 @@ void displayTetromino() {
       fill(255);
     }
   }
+}
+
+int getTetrominoWidth() {
+  int tWidth = 0 ;
+  int tWidthRecord = -1 ;
+  for (int i = 0; i < tetrominoW; i++) {
+    for (int j = 0; j < tetrominoH; j++) {
+      if (tetromino[piece][i][j] > 0) tWidth++;
+    }
+    if (tWidth > tWidthRecord) tWidthRecord = tWidth;
+  }
+  return tWidthRecord;
 }
