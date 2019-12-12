@@ -10,8 +10,8 @@ int lb = 0;
 boolean backstep = false;
 int p;
 int pieceCount = 0;
-PVector scanner = new PVector(0, 0);
-PVector scannerMin = new PVector(0, 0);
+PVector scanner = new PVector(3, 3);
+PVector scannerMin = new PVector(3, 3);
 boolean next = false;
 int[][][] tetromino = {
 
@@ -161,26 +161,35 @@ void draw() {
   background(255);
   ug.display();
   if (next) {
-    checkArea();
-
-    if (overLayTotal <= 0) {
-      pasteTetromino();
-      count = 0;
-      scanner.x+= lastBlock+1-firstBlock;
+    if (checkFirst()) {
+      next = true;
+    } else {
+      checkArea();
+      //skip to avoid holes
+      if (overLayTotal <= 0 ) {
+        if (piece ==  6  && ug.grid[0][int(scanner.y)][int(scanner.x+lastBlock+1)] > 0) {
+   
+        } else {
+                 pasteTetromino();
+          count = 0;
+          scanner.x+= lastBlock+1-firstBlock;
+        }
+      }
+      tetrominoSum = 0;
+      overLayTotal = 0;
+      //piece = int(random(tetromino.length));
+      addBlock();
+      next = false;
     }
-    tetrominoSum = 0;
-    overLayTotal = 0;
-    //piece = int(random(tetromino.length));
-    addBlock();
-    next = false;
   }
-  if (scanner.x >= width/blockWidth-tetromino[piece].length) {
+
+  if (scanner.x > width/blockWidth-tetromino[piece].length) {
     scanner.x = scannerMin.x;
     scanner.y++;
   }
   if (piece >= tetromino.length) piece = 0;
 
-  if (scanner.y >= 17) {
+  if (scanner.y >= height/blockWidth) {
     scanner.y = scannerMin.y;
     ug.clear();
   }
@@ -255,14 +264,9 @@ void keyPressed() {
   }
 }
 
-void checkFirst() {
-  getTetrominoSum();
-  overLayTotal = 0;
-
-  if ( tetromino[piece][0][firstBlock] + ug.grid[0][int(scanner.x)][firstBlock] > 1) next = true;
-
-  println("T: " + tetrominoSum);
-  println("O: "+ overLayTotal);
+boolean checkFirst() {
+  if ( tetromino[piece][0][firstBlock] + ug.grid[0][firstBlock][int(scanner.x)] > 1) return true;
+  else return false;
 }
 
 void checkArea() {
@@ -271,7 +275,7 @@ void checkArea() {
   for (int i = 0; i < tetrominoW; i++) {
     for (int j = 0; j < tetrominoH; j++) {
       fill(0, 255, 0, 100);
-      if ( tetromino[piece][j][i] > 0) overLayTotal += ug.checkGrid(int(scanner.y+i), int((scanner.x+j)), 1);
+      if ( tetromino[piece][j][i] > 0) overLayTotal += ug.checkGrid(int(scanner.y+i-firstBlock), int((scanner.x+j)), 1);
     }
   }
   println("T: " + tetrominoSum);
@@ -307,7 +311,7 @@ void displayTetromino() {
       if (tetromino[piece][i][j] > 0) fill(255, 0, 0);
       else noFill();
       noStroke();
-      rect(int(scanner.x+i*blockWidth)-firstBlock*blockWidth, int(scanner.y+j*blockWidth), blockWidth, blockWidth);
+      rect(int(i*blockWidth)-firstBlock*blockWidth, int(j*blockWidth), blockWidth, blockWidth);
       fill(255);
     }
   }
@@ -324,3 +328,6 @@ int getTetrominoWidth() {
   }
   return tWidthRecord;
 }
+
+// Still need:
+// scan bottom row, if it overlaps
