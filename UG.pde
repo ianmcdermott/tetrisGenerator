@@ -9,7 +9,6 @@ class Undergrid {
     displayGrid = new int[1][ceil(height/cellWidth)][ceil(width/cellWidth)];
 
     println("Made new grid with the following dimensions:");
-    println(grid.length+" "+ceil(width/cellWidth)+" "+ceil(height/cellWidth));
     for (int i = 0; i < grid.length; i++) {
       for (int j = 0; j < grid[i].length; j++) {
         for (int k = 0; k < grid[i][j].length; k++) {
@@ -57,8 +56,6 @@ class Undergrid {
 
   int checkGrid(int i, int j, int val) {
     int total = 0;
-    println("grid:" + i+": "+j+":v: "+val);
-
     if (val + grid[0][i][j] > 1) {
       stroke(0, 255, 0);
       noFill();
